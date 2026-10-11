@@ -235,11 +235,11 @@ img{max-width:100%}
       <div class="bulk">
         <div>
           <h3>Bidón de 6 kg de salsas thai</h3>
-          <p>Para locales y compras por mayor. $11.000 el kg, $66.000 el bidón.</p>
+          <p>Para locales y compras por mayor. Consultanos por el precio.</p>
         </div>
         <a class="btn btn-red" data-wa="Hola! Me interesa el bidón de 6 kg de salsas thai. ¿Qué sabores tienen disponibles?" target="_blank" rel="noopener">Consultar por WhatsApp</a>
       </div>
-      <p class="note">Precios en pesos argentinos. Pueden cambiar; confirmamos el total y el envío al coordinar el pedido.</p>
+      <p class="note">Consultá precios y envío por WhatsApp al coordinar el pedido.</p>
     </div>
   </section>
 
@@ -313,8 +313,6 @@ img{max-width:100%}
       <button class="btn btn-line btn-sm" type="button" data-close>Cerrar</button>
     </div>
     <ul class="lines" id="lines"></ul>
-    <div class="total"><span>Total</span><b id="total"></b></div>
-    <p class="help" id="pendingNote" hidden>Hay productos sin precio publicado; te lo confirmamos por WhatsApp.</p>
     <a class="btn btn-red" id="sendWa" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#wa"/></svg>Enviar pedido por WhatsApp</a>
     <a class="btn btn-line" data-ml="store" target="_blank" rel="noopener">Prefiero comprar en Mercado Libre</a>
     <button class="link-btn" type="button" id="clear">Vaciar pedido</button>
@@ -394,7 +392,6 @@ function card(p){
       '<details class="ing"><summary>Ingredientes</summary><p>'+p.ing+'</p></details>' +
       '<div class="sizes" role="group" aria-label="Presentación">'+sizes+'</div>' +
       '<div class="buy">' +
-        '<div class="price" data-price>'+(sz[1]==null?'<small>Precio a consultar</small>':fmt(sz[1]))+'</div>' +
         '<div class="row">' +
           '<button type="button" class="btn btn-red btn-sm" data-act="add">Agregar al pedido</button>' +
           '<a class="btn btn-line btn-sm" href="'+mlProduct(p)+'" target="_blank" rel="noopener">Mercado Libre</a>' +
@@ -420,8 +417,6 @@ $('#grid').addEventListener('click', e => {
   if(btn.dataset.act==='size'){
     state.size[p.id] = +btn.dataset.i;
     $$('[data-act="size"]',art).forEach(b=>b.setAttribute('aria-pressed', String(b===btn)));
-    const pr = p.sizes[+btn.dataset.i][1];
-    $('[data-price]',art).innerHTML = pr==null ? '<small>Precio a consultar</small>' : fmt(pr);
   } else if(btn.dataset.act==='add'){
     const key = p.id + '|' + (state.size[p.id]||0);
     cart.set(key, (cart.get(key)||0) + 1);
@@ -441,21 +436,16 @@ function lines(){
 function renderCart(){
   const ls = lines();
   const count = ls.reduce((a,l)=>a+l.q,0);
-  const total = ls.reduce((a,l)=>a+(l.price==null?0:l.price*l.q),0);
-  const pending = ls.some(l=>l.price==null);
   $('#cartbar').hidden = count===0;
   document.body.classList.toggle('has-cart', count>0);
-  $('#barsum').innerHTML = count + (count===1?' producto':' productos') + ' · ' + fmt(total) + (pending?'<small>Más productos a consultar</small>':'');
+  $('#barsum').innerHTML = count + (count===1?' producto':' productos');
   $('#lines').innerHTML = ls.map(l=>
     '<li class="line"><div class="nm">'+l.p.name+'<small>'+l.size+'</small></div>' +
-    '<div class="lp">'+(l.price==null?'A consultar':fmt(l.price*l.q))+'</div>' +
     '<div class="qty" data-key="'+l.key+'"><button type="button" data-q="-1" aria-label="Quitar uno">−</button><span>'+l.q+'</span><button type="button" data-q="1" aria-label="Sumar uno">+</button></div></li>'
   ).join('');
-  $('#total').textContent = fmt(total);
-  $('#pendingNote').hidden = !pending;
   const msg = 'Hola! Quiero hacer este pedido de A Puro Chili:\n' +
-    ls.map(l=>'- '+l.q+' x '+l.p.name+' '+l.size+(l.price==null?' (precio a consultar)':' ('+fmt(l.price*l.q)+')')).join('\n') +
-    '\nTotal: '+fmt(total)+(pending?' + productos a consultar':'')+'\n¿Me confirman disponibilidad y envío?';
+    ls.map(l=>'- '+l.q+' x '+l.p.name+' '+l.size).join('\n') +
+    '\n¿Me confirman precio, disponibilidad y envío?';
   $('#sendWa').href = waLink(msg);
   if(count===0) closeCart();
 }
